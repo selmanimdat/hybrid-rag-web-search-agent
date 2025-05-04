@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>AKÜBOT Web Arayüz</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <div class="container">
+    <div class="left">
+      <canvas id="audio-circle" width="200" height="200"></canvas>
+      <button id="start-stop-btn">Başlat</button>
+    </div>
+    <div class="right">
+      <div id="status">Durum: Hazır</div>
+    </div>
+  </div>
+
+  <script src="/static/js/main.js"></script>
+
+  <script>
+    let isListening = false;
+
+    // Buton işlevselliği
+    document.getElementById('start-stop-btn').addEventListener('click', function() {
+      if (isListening) {
+        fetch('/stop', { method: 'POST' })
+          .then(response => response.json())
+          .then(data => {
+            console.log(data.message);
+            document.getElementById('status').innerText = 'Durum: Durduruldu';
+            isListening = false;
+            document.getElementById('start-stop-btn').innerText = 'Başlat';
+          });
+      } else {
+        fetch('/start', { method: 'POST' })
+          .then(response => response.json())
+          .then(data => {
+            console.log(data.message);
+            document.getElementById('status').innerText = 'Durum: Dinliyor';
+            isListening = true;
+            document.getElementById('start-stop-btn').innerText = 'Durdur';
+          });
+      }
+    });
+
+    // Durumu periyodik olarak güncelle
+    setInterval(() => {
+      fetch('/status')
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById('status').innerText = 'Durum: ' + data.status;
+        });
+    }, 1000); // Her saniyede bir güncelle
+  </script>
+</body>
+</html>
